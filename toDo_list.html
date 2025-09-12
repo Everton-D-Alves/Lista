@@ -10,8 +10,13 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        input, button {
-            margin: 5px;
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 15px;
         }
         ul {
             list-style-type: none;
@@ -24,60 +29,66 @@
             cursor: pointer;
         }
         li:hover {
-            background: #ddd;
+            background: #e4e4e4;
         }
     </style>
 </head>
 <body>
     <h2>ToDo List</h2>
+    <p>Uma simples aplicação de lista de tarefas usando Local Storage para persistência dos dados.</p>
+    <p>Para eliminar uma tarefa individual, clique em cima da tarefa.</p>
+    <input type="text" id="taskInput" placeholder="Adicionar nova tarefa">
+    <button onclick="addTask()">Adicionar</button>
+    <ul id="taskList"></ul>
     <script>
-        // Criando a estrutura básica da ToDo List
-        document.write('<input type="text" id="taskInput" placeholder="Nova tarefa">');
-        document.write('<button onclick="addTask()">Adicionar</button>');
-        document.write('<button onclick="saveTasks()">Salvar Tarefas</button>');
-        document.write('<ul id="taskList"></ul>');
-        // Botão de remover item da lista
-        document.write('<button onclick="document.getElementById(\'taskList\').innerHTML = \'\'">Limpar Lista</button>');
-        // Clicar individualmente em cada item para removê-los:
-        document.write('<p>Clique em cima de uma tarefa para removê-la.</p>');
-        // Adiciona evento de clique para remover tarefa individualmente
-        document.addEventListener('click', function(e) {
-            if (e.target && e.target.nodeName === "LI") {
-                e.target.parentNode.removeChild(e.target);
-            }
-        });       
-        // Função para adicionar uma nova tarefa
+        // Função para adicionar tarefa
         function addTask() {
-            const taskInput = document.getElementById("taskInput");
-            const task = taskInput.value;
-            if (task) {
-                const li = document.createElement("li");
-                li.textContent = task;
-                document.getElementById("taskList").appendChild(li);
-                taskInput.value = "";
+            const taskInput = document.getElementById('taskInput');
+            const taskList = document.getElementById('taskList');
+
+            if (taskInput.value.trim() !== '') {
+                const li = document.createElement('li');
+                li.textContent = taskInput.value;
+                taskList.appendChild(li);
+                taskInput.value = '';
             }
         }
-        // Função para salvar tarefas no Local Storage
-        function saveTasks() {
+        // Carregar tarefas do Local Storage ao iniciar
+        window.onload = function() {
+            const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskList = document.getElementById('taskList');
+            savedTasks.forEach(task => {
+                const li = document.createElement('li');
+                li.textContent = task;
+                taskList.appendChild(li);
+            });
+        };
+        // Salvar tarefas no Local Storage antes de sair
+        window.onbeforeunload = function() {
+            const taskList = document.getElementById('taskList');
             const tasks = [];
-            document.querySelectorAll("#taskList li").forEach(li => {
+            taskList.querySelectorAll('li').forEach(li => {
                 tasks.push(li.textContent);
             });
-            localStorage.setItem("tasks", JSON.stringify(tasks));
-            console.log("Tarefas salvas no Local Storage.");
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        };  
+        // Excluir tarefas ao clicar nelas
+        document.getElementById('taskList').addEventListener('click', function(e) {
+            if (e.target && e.target.nodeName === 'LI') {
+                e.target.remove();
+            }
+        }); 
+        // Excluir todas as tarefas
+        function clearTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            localStorage.removeItem('tasks');
         }
-        // Função para carregar tarefas do Local Storage
-        function loadTasks() {
-            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-            tasks.forEach(task => {
-                const li = document.createElement("li");
-                li.textContent = task;
-                document.getElementById("taskList").appendChild(li);
-            });
-            console.log("Tarefas carregadas do Local Storage.");
-        }
-        // Carregar tarefas ao iniciar a página
-        window.onload = loadTasks;  
+        // Botão para limpar todas as tarefas
+        const clearButton = document.createElement('button');
+        clearButton.textContent = 'Limpar Tarefas';
+        clearButton.onclick = clearTasks;
+        document.body.appendChild(clearButton); 
     </script>
 </body>
 </html>
