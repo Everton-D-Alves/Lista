@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="brisa.ico" type="image/x-icon">
+    <title>Lista simples</title>
+    <style>
+        li{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Lista simples</h2>
+    <p>Adicione itens à lista e clique neles para removê-los.</p>
+    <input type="text" id="itemInput" placeholder="Novo item...">
+    <button onclick="addItem()">Adicionar</button>
+    <ul id="itemList"></ul>
+
+    <script>
+        function addItem() {
+            const input = document.getElementById('itemInput');
+            const itemText = input.value.trim();
+            if (itemText) {
+                const li = document.createElement('li');
+                li.textContent = itemText;
+                li.onclick = function() {
+                    this.remove();
+                };
+                document.getElementById('itemList').appendChild(li);
+                input.value = '';
+            }
+        }
+        // Botão de limpar lista:
+        function clearList() {
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = '';
+        }
+        // Adiciona um botão para limpar a lista
+        const clearButton = document.createElement('button');
+        clearButton.textContent = 'Limpar Lista';
+        clearButton.onclick = clearList;
+        document.body.insertBefore(clearButton, document.getElementById('itemList'));
+        // Armazenar cookies
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days*24*60*60*1000));
+            const expires = "expires="+ d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+        function getCookie(name) {
+            const cname = name + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(cname) == 0) {
+                    return c.substring(cname.length, c.length);
+                }
+            }
+            return "";
+        }
+        // Salvar lista em cookies ao sair
+        window.onbeforeunload = function() {
+            const items = [];
+            document.querySelectorAll('#itemList li').forEach(li => {
+                items.push(li.textContent);
+            });
+            setCookie('itemList', JSON.stringify(items), 7);
+        };
+        // Carregar lista de cookies ao iniciar
+        window.onload = function() {
+            const savedItems = getCookie('itemList');
+            if (savedItems) {
+                const items = JSON.parse(savedItems);
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    li.onclick = function() {
+                        this.remove();
+                    };
+                    document.getElementById('itemList').appendChild(li);
+                });
+            }
+        };  
+    </script>
+</body>
+</html>
